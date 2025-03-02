@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "SrtMerge": {
+      "commandName": "Project"
+    },
+    "Not working": {
+      "commandName": "Project",
+      "commandLineArgs": "-l 300 en220813_read1.srt t3.srt"
+    }
+  }
+}
