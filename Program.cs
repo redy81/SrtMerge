@@ -42,12 +42,12 @@
             return CondensedData;
         }
 
-        static SrtBlock MergeBlocks( List<SrtBlock> blocks, int idx, TimeSpan start )
+        static SrtBlock MergeBlocks( List<SrtBlock> blocks, int idx, TimeSpan start, int duration )
         {
             SrtBlock o = new();
 
             o.Start = start;
-            o.End = o.Start + new TimeSpan( 0, 1, 30 );
+            o.End = o.Start + new TimeSpan( 0, 0, duration );
 
             o.Index = idx;
             o.Content = string.Join( " ", blocks.Select( x => x.Content ) );
@@ -55,7 +55,7 @@
             return o;
         }
 
-        static SrtFile CompactData2( SrtFile input, int lineLen, bool ignoreEnding )
+        static SrtFile CompactData2( SrtFile input, int lineLen, int duration, bool ignoreEnding )
         {
             SrtFile CondensedData = new();
             List<(int, bool)> DataProcess = new();
@@ -95,7 +95,7 @@
 
                 if ( i >= DataProcess.Count )
                 {
-                    CondensedData.Blocks.Add( MergeBlocks( input.Blocks.Skip( startIdx ).ToList(), blockIdx, blockStart ) );
+                    CondensedData.Blocks.Add( MergeBlocks( input.Blocks.Skip( startIdx ).ToList(), blockIdx, blockStart, duration ) );
                     done = true;
                 }
                 else
@@ -111,9 +111,9 @@
                     }
 
                     // Merge
-                    CondensedData.Blocks.Add( MergeBlocks( input.Blocks.Skip( startIdx ).Take( 1 + lastValid - startIdx ).ToList(), blockIdx, blockStart ) );
+                    CondensedData.Blocks.Add( MergeBlocks( input.Blocks.Skip( startIdx ).Take( 1 + lastValid - startIdx ).ToList(), blockIdx, blockStart, duration ) );
                     blockIdx++;
-                    blockStart += new TimeSpan( 0, 1, 30 );
+                    blockStart += new TimeSpan( 0, 0, duration );
 
                     startIdx = lastValid + 1;
                 }
@@ -130,13 +130,19 @@
             Console.WriteLine( "" );
             Console.WriteLine( "Options:" );
             Console.WriteLine( "-l [lenght]      Change merge block length (Default 500)" );
+            Console.WriteLine( "-d [duration s]  Change the blocks' duration in the output (Default 60)" );
             Console.WriteLine( "-a               Skip checks for sentence end" );
             Console.WriteLine( "-h               Show this help" );
+
+            Console.WriteLine( "" );
+            Console.WriteLine( "Example:" );
+            Console.WriteLine( "> SrtMerge -d 75 input.srt converted.srt" );
+            Console.WriteLine( "" );
         }
 
         static void Main( string[] args )
         {
-            Console.WriteLine( "Srt Merger v1.01 - redy81" );
+            Console.WriteLine( "Srt Merger v1.02 - redy81" );
 
             if ( args.Length < 2 )
             {
@@ -156,6 +162,7 @@
             string OutputFile = "";
             bool IgnoreEndings = false;
             int LineLength = 500;
+            int Duration = 60;
 
             for ( int i = 0; i < args.Length; i++ )
             {
@@ -174,6 +181,19 @@
                         catch
                         {
                             Console.WriteLine( "Invalid -l value" );
+                            return;
+                        }
+                        break;
+
+                    case "-d":
+                        try
+                        {
+                            Duration = int.Parse( args[i + 1] );
+                            i++;
+                        }
+                        catch
+                        {
+                            Console.WriteLine( "Invalid -d value" );
                             return;
                         }
                         break;
@@ -198,7 +218,7 @@
 
             var InputData = new SrtFile( InputSrtFile.ToList() );
 
-            var CondensedData = CompactData2( InputData, LineLength, IgnoreEndings );
+            var CondensedData = CompactData2( InputData, LineLength, Duration, IgnoreEndings );
 
             Console.WriteLine();
 
