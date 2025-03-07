@@ -136,7 +136,7 @@
 
         static void Main( string[] args )
         {
-            Console.WriteLine( "Srt Merger v1.0 - redy81" );
+            Console.WriteLine( "Srt Merger v1.01 - redy81" );
 
             if ( args.Length < 2 )
             {

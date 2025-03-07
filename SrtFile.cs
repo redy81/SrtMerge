@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,8 +19,8 @@ namespace SrtMerge
             var toks = text[1].Split( "-->", StringSplitOptions.TrimEntries );
 
             Index = int.Parse( text[0] );
-            Start = TimeSpan.Parse( toks[0] );
-            End = TimeSpan.Parse( toks[1] );
+            Start = TimeSpan.Parse( toks[0].Replace( ",", "." ), CultureInfo.InvariantCulture );
+            End = TimeSpan.Parse( toks[1].Replace( ",", "." ), CultureInfo.InvariantCulture );
             Content = string.Join( Environment.NewLine, text.Skip( 2 ) );
         }
 
@@ -85,7 +86,7 @@ namespace SrtMerge
         {
             StringWriter output = new();
 
-            foreach( var b in Blocks)
+            foreach ( var b in Blocks )
             {
                 output.Write( b.GetBlock() );
                 output.Write( Environment.NewLine );
